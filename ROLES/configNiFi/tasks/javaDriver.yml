@@ -1,0 +1,9 @@
+---
+
+- name: copy java driver {{ jdbc_artifact }}
+  copy:
+    src: "{{repo}}/{{jdbc_artifact}}"
+    dest: "{{nifi_home}}/lib"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    force: yes

@@ -1,0 +1,18 @@
+---
+
+- name: Copy rpm file to server
+  copy:
+    src: "{{repo}}/{{jdk_artifact}}"
+    dest: "/tmp/{{jdk_artifact}}"
+
+- name: Install package
+  yum:
+    name: "/tmp/{{jdk_artifact}}"
+    state: present
+
+- name: setup Java home env variable
+  lineinfile:
+    path: ~/.bash_profile
+    line: "export JAVA_HOME={{java_home}}"
+    state: present
+    backup: yes

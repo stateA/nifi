@@ -1,0 +1,11 @@
+---
+
+- name: install jdk
+  hosts: all
+  user: root
+  become: true
+
+  vars_files:
+    - ../CONF/config.yml
+  roles:
+    - ../ROLES/installJDK

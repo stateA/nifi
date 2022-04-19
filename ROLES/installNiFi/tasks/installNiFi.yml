@@ -1,0 +1,108 @@
+---
+- name: Create NiFi source directory
+  file:
+    path: "{{ nifi_base_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Create nifi group
+  group:
+    name: "{{ nifi_group }}"
+
+- name: Create nifi user
+  user:
+    name: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: copy nifi archive distribution
+  copy:
+    src: "{{repo}}/{{nifi_archive_name}}"
+    dest: "{{ nifi_base_dir }}"
+    force: yes
+
+- name: Unarchive NiFi distribution
+  unarchive:
+    src: "{{ nifi_base_dir }}/{{ nifi_archive_name }}"
+    dest: "{{ nifi_base_dir }}"
+    copy: false
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Ensure nifi files are world-readable
+  file:
+    path: "{{ nifi_base_dir }}"
+    state: directory
+    mode: "a+rX"
+    recurse: true
+
+- name: Make sure the NiFi distribution dir has right permissions
+  file:
+    path: "{{ nifi_base_dir }}/nifi-{{ nifi_version }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    recurse: true
+
+- name: Ensure nifi symlink
+  file:
+    src: "{{ nifi_base_dir }}/nifi-{{ nifi_version }}"
+    dest: "{{ nifi_home }}"
+    state: link
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    follow: false
+
+- name: Create nifi systemd service
+  template:
+    src: nifi.service.j2
+    dest: "{{ nifi_service }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version >= "7"
+  tags: [ service ]
+
+
+- name: Ensure nifi-required directories exist and are world-readable
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: 0755
+  with_items:
+    - "{{ nifi_conf_dir }}"
+    - "{{ nifi_log_dir }}"
+    - "{{ nifi_pid_dir }}"
+    - "{{ nifi_nar_dir }}"
+    - "{{ nifi_work_dir }}"
+    - "{{ nifi_etc_dir }}"
+    - "{{ nifi_database_repository }}"
+    - "{{ nifi_flowfile_repository }}"
+    - "{{ nifi_run_dir }}"
+
+- name: Ensure nifi content repo directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: 0755
+  with_items: "{{ nifi_content_repositories }}"
+
+- name: Ensure nifi provenance repo directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: 0755
+  with_items: "{{ nifi_provenance_repositories }}"
+
+- name: Ensure nifi extra directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: 0755
+  with_items: "{{ nifi_extra_dirs | default([]) }}"

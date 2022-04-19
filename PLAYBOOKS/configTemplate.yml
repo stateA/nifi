@@ -1,0 +1,11 @@
+---
+
+- name: configure NiFi templates
+  hosts: all
+  user: root
+  become: true
+
+  vars_files:
+    - ../CONF/config.yml
+  roles:
+    - ../ROLES/configTemplate

@@ -1,0 +1,52 @@
+---
+- name: setup linux limits-hard
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "*  hard  nofile  {{ hard_nofile }}"
+    state: present
+    backup: yes
+
+- name: setup linux limits-soft
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "*  soft  nofile  {{ soft_nofile }}"
+    state: present
+    backup: yes
+
+- name: copy nifi.properties
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: "0644"
+  with_items:
+    - { src: "nifi.properties.j2", dest: "{{ nifi_conf_dir }}/nifi.properties" }
+  tags: [ deploy, prop, props ]
+
+- name: copy nifi configs
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: "0644"
+  with_items:
+    - { src: "bootstrap.conf.j2", dest: "{{ nifi_conf_dir }}/bootstrap.conf" }
+    - { src: "logback.xml.j2", dest: "{{ nifi_conf_dir }}/logback.xml" }
+  tags: [ config ]
+
+- name: copy database.config
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    mode: "0644"
+  with_items:
+    - { src: "database.config.j2", dest: "{{ nifi_conf_dir }}/database.config" }
+
+#- name: Ensure NiFi is running
+#  service: name=nifi state=started enabled=yes
+#  when: nifi_perform_restart
+

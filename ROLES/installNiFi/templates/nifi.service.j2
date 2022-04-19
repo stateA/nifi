@@ -1,0 +1,13 @@
+[Unit]
+Description=Apache NiFi
+After=syslog.target network.target
+
+[Service]
+User={{ nifi_user }}
+Type=forking
+Environment="JAVA_HOME={{ java_home }}"
+ExecStart={{ nifi_base_dir }}/nifi-current/bin/nifi.sh start
+ExecStop={{ nifi_base_dir }}/nifi-current/bin/nifi.sh stop
+
+[Install]
+WantedBy=multi-user.target
