@@ -1,11 +1,12 @@
 ---
 
-- name: install NiFi
+- name: add NiFi templates
   hosts: all
+  gather_facts: false
   user: "{{ user_admin }}"
   become: true
 
   vars_files:
     - ../CONF/config.yml
   roles:
-    - ../ROLES/installNiFi
+    - ../ROLES/addTemplate

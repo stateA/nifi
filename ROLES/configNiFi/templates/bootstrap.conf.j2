@@ -17,7 +17,8 @@
 
 # Java command to use when running NiFi
 java=java
-
+# Java tmp
+java.arg.snappy=-Dorg.xerial.snappy.tempdir={{ nifi_tmp }}
 # Username to use when running NiFi. This value will be ignored on Windows.
 run.as=
 

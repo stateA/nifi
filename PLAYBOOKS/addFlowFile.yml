@@ -1,6 +1,6 @@
 ---
 
-- name: install NiFi
+- name: add active TA flow file
   hosts: all
   user: "{{ user_admin }}"
   become: true
@@ -8,4 +8,4 @@
   vars_files:
     - ../CONF/config.yml
   roles:
-    - ../ROLES/installNiFi
+    - ../ROLES/addFlowFile

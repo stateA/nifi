@@ -1,0 +1,37 @@
+---
+
+- name: get process-group id
+  uri:
+    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/flow/process-groups/root
+    method: GET
+  register: command_out
+
+- name: call for templates
+  uri:
+    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/flow/templates
+    method: GET
+  register: templates_out
+
+- name: get template id
+  debug:
+    msg: 
+      - "Number of templates found: '{{ templates_out.json.templates | length }}'"
+      - "Template id to add to the main process group {{ command_out.json.processGroupFlow.id }} : {{ templates_out.json.templates[0].id }}"
+      - "Template id to add to the main process group {{ command_out.json.processGroupFlow.id }} : {{ templates_out.json.templates[1].id }}"
+
+- name: add the templates
+  uri:
+    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/process-groups/{{ command_out.json.processGroupFlow.id }}/template-instance
+    method: POST
+    body: "{\"templateId\":\"{{ templates_out.json.templates[0].id }}\",\"originX\":137.0,\"originY\":108.0,\"disconnectedNodeAcknowledged\":false}"
+    body_format: json
+    status_code: 201
+
+- name: add the templates
+  uri:
+    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/process-groups/{{ command_out.json.processGroupFlow.id }}/template-instance
+    method: POST
+    body: "{\"templateId\":\"{{ templates_out.json.templates[1].id }}\",\"originX\":590.0,\"originY\":108.0,\"disconnectedNodeAcknowledged\":false}"
+    body_format: json
+    status_code: 201
+

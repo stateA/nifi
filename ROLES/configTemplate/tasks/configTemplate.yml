@@ -11,13 +11,18 @@
     url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/flow/process-groups/{{ command_out.json.processGroupFlow.id }}
     method: GET
 
-- name: update templates
-  uri:
-    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/process-groups/{{ command_out.json.processGroupFlow.id }}/templates/upload
-    method: POST
-    body: "{{ lookup('file','issue.json') }}"
-    body_format: json
-    
+- name: copy template to NiFi node
+  copy:
+    src: "{{ repo }}/{{ item }}"
+    dest: "/tmp/"
+  with_items: "{{ upload_templates }}"
 
+- name: upload template to Nifi
+  shell: curl -F template=@{{ item }} http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/process-groups/{{ command_out.json.processGroupFlow.id }}/templates/upload
+  register: response_upload
+  args:
+    chdir: /tmp
+  with_items: "{{ upload_templates }}"
+    
 - debug:
-    msg: "{{process_group}}"
+    msg: "{{ response_upload }}"

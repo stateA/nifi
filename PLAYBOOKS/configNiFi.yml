@@ -2,7 +2,7 @@
 
 - name: configure NiFi
   hosts: all
-  user: root
+  user: "{{ user_admin }}"
   become: true
 
   vars_files:

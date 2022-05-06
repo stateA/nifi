@@ -1,10 +1,4 @@
 ---
-- name: Create NiFi source directory
-  file:
-    path: "{{ nifi_base_dir }}"
-    state: directory
-    mode: 0755
-
 - name: Create nifi group
   group:
     name: "{{ nifi_group }}"
@@ -12,6 +6,14 @@
 - name: Create nifi user
   user:
     name: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Create NiFi source directory
+  file:
+    path: "{{ nifi_base_dir }}"
+    state: directory
+    mode: 0755
+    owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
 
 - name: copy nifi archive distribution
@@ -70,12 +72,11 @@
     group: "{{ nifi_group }}"
     mode: 0755
   with_items:
-    - "{{ nifi_conf_dir }}"
+    - "{{ nifi_python_scripts_dir }}"
+    - "{{ nifi_tmp }}"
     - "{{ nifi_log_dir }}"
-    - "{{ nifi_pid_dir }}"
     - "{{ nifi_nar_dir }}"
     - "{{ nifi_work_dir }}"
-    - "{{ nifi_etc_dir }}"
     - "{{ nifi_database_repository }}"
     - "{{ nifi_flowfile_repository }}"
     - "{{ nifi_run_dir }}"
@@ -98,11 +99,3 @@
     mode: 0755
   with_items: "{{ nifi_provenance_repositories }}"
 
-- name: Ensure nifi extra directories exist
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ nifi_user }}"
-    group: "{{ nifi_group }}"
-    mode: 0755
-  with_items: "{{ nifi_extra_dirs | default([]) }}"

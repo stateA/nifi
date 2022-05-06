@@ -1,0 +1,54 @@
+---
+
+- name: copy NiFi flow archive
+  copy:
+    src: "{{repo}}/{{nifi_flow_archive}}"
+    dest: "{{ nifi_conf_dir }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    force: yes
+
+- name: copy NiFi python scripts archive
+  copy:
+    src: "{{repo}}/{{nifi_python_archive_name}}"
+    dest: "{{ nifi_python_scripts_dir }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    force: yes
+
+- name: Unarchive NiFi python scripts
+  unarchive:
+    src: "{{ nifi_python_scripts_dir }}/{{nifi_python_archive_name}}"
+    dest: "{{ nifi_python_scripts_dir }}"
+    copy: false
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Start nifi service
+  ansible.builtin.service:
+    name: nifi
+    state: started
+
+- name: Waits for nifi service to start, don't start checking for 10 seconds
+  wait_for:
+    port: "{{ nifi_web_http_port }}"
+    delay: 10
+
+
+- name: get process-group id
+  uri:
+    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/flow/process-groups/root
+    method: GET
+  register: command_out
+
+- name: call for templates
+  uri:
+    url: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi-api/flow/templates
+    method: GET
+  register: templates_out
+
+- name: get template id
+  debug:
+    msg:
+      - "Number of active templates found: '{{ templates_out.json.templates | length }}'"
+      - "Web console available at: http://{{ ansible_host }}:{{ nifi_web_http_port }}/nifi/"

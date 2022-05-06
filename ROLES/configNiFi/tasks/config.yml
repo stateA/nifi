@@ -20,6 +20,7 @@
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
     mode: "0644"
+    backup: true
   with_items:
     - { src: "nifi.properties.j2", dest: "{{ nifi_conf_dir }}/nifi.properties" }
   tags: [ deploy, prop, props ]
@@ -31,6 +32,7 @@
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
     mode: "0644"
+    backup: true
   with_items:
     - { src: "bootstrap.conf.j2", dest: "{{ nifi_conf_dir }}/bootstrap.conf" }
     - { src: "logback.xml.j2", dest: "{{ nifi_conf_dir }}/logback.xml" }
@@ -43,10 +45,7 @@
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
     mode: "0644"
+    backup: true
   with_items:
     - { src: "database.config.j2", dest: "{{ nifi_conf_dir }}/database.config" }
-
-#- name: Ensure NiFi is running
-#  service: name=nifi state=started enabled=yes
-#  when: nifi_perform_restart
 
